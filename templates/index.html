@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Know It All AI Query - LLM Q&A System</title>
+    <style>
+        /* 🎨 General Page Style (Purple/Blue Gradient) */
+        body {
+            font-family: 'Verdana', sans-serif;
+            /* Soft background gradient */
+            background: linear-gradient(135deg, #f7f3ff 0%, #e0e7ff 100%); 
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 80px;
+            min-height: 100vh;
+            margin: 0;
+            color: #383838;
+        }
+        
+        /* 🔮 Query Box Styling */
+        .query-box {
+            background: #ffffff;
+            padding: 40px 45px;
+            border-radius: 20px;
+            /* Deep, colorful shadow and light border glow */
+            box-shadow: 0 15px 30px rgba(78, 48, 126, 0.2), 0 0 0 5px rgba(175, 142, 255, 0.1); 
+            width: 500px;
+            max-width: 90%;
+            text-align: center;
+            border: 1px solid #d0c0f0;
+        }
+
+        /* 🌟 Title Style */
+        h2 {
+            color: #5c359d;
+            margin-bottom: 5px;
+            font-size: 1.8em;
+            letter-spacing: 0.5px;
+        }
+        .project-info {
+            font-size: 0.9em;
+            color: #7d7d7d;
+            margin-bottom: 25px;
+        }
+
+        /* Input/Button Container */
+        .input-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        /* 🖋️ Input Field Styling */
+        input {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            transition: all 0.3s ease;
+        }
+        input:focus {
+            border-color: #9d6fff;
+            box-shadow: 0 0 8px rgba(157, 111, 255, 0.5);
+            outline: none;
+        }
+
+        /* 🚀 Button Styling (Vibrant Purple/Magenta) */
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            /* Purple gradient */
+            background: linear-gradient(90deg, #9d6fff 0%, #a35dd9 100%); 
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(163, 93, 217, 0.4);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        button:hover {
+            /* Gradient reverse on hover */
+            background: linear-gradient(90deg, #a35dd9 0%, #9d6fff 100%); 
+            box-shadow: 0 6px 15px rgba(163, 93, 217, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Response Boxes Container */
+        .response-section {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        /* Processed Q Box (Required by Assignment) */
+        .processed-q-box {
+            padding: 10px 15px;
+            background: #fff0f5; /* Light Pink for contrast */
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #7d4f68;
+            border: 1px solid #f0d0e0;
+            min-height: 20px;
+        }
+        .processed-q-box::before {
+            content: "✅ PROCESSED QUESTION:";
+            display: block;
+            font-size: 0.8em;
+            color: #7d4f68;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* LLM Response Box */
+        #displayResponse {
+            padding: 18px;
+            background: #e9e0ff; /* Soft lavender background */
+            border-radius: 12px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            border: 1px solid #c8b9f0;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+        #displayResponse::before {
+            content: "💡 LLM ANSWER:";
+            display: block;
+            font-size: 0.8em;
+            color: #5c359d;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="query-box">
+        <h2>Know It All AI Query</h2>
+        
+        <div class="input-container">
+            <input type="text" id="userPrompt" placeholder="Enter your question here">
+            <button id="askButton">Ask AI</button>
+        </div>
+
+        <div class="response-section">
+            <div class="processed-q-box" id="processedQuestion">
+                *The processed question will appear here (lowercased, punctuation removed).*
+            </div>
+            <div id="displayResponse">
+                Your AI answer will appear here.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Grab DOM elements
+        const askButton = document.getElementById('askButton');
+        const userInput = document.getElementById('userPrompt');
+        const responseBox = document.getElementById('displayResponse');
+        const processedBox = document.getElementById('processedQuestion'); 
+
+        // Function to send the question to the backend AI
+        async function submitQuestion() {
+            const question = userInput.value.trim();
+
+            if (!question) {
+                responseBox.innerText = "Please type a question before submitting.";
+                processedBox.innerText = "No question received.";
+                return;
+            }
+
+            // Show loading state
+            processedBox.innerText = "Processing...";
+            responseBox.innerText = "🤖 AI is thinking... Please wait for the response.";
+
+            try {
+                const response = await fetch("/ask-ai", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question: question })
+                });
+
+                const data = await response.json();
+                
+                // 1. Display Processed Question (required by assignment)
+                // The 'data.processed_q' key is sent by app.py
+                processedBox.innerText = data.processed_q || "Could not retrieve processed question.";
+                
+                // 2. Display Final Answer
+                // The 'data.reply' key is sent by app.py
+                responseBox.innerText = data.reply || "No answer received."; 
+
+            } catch (err) {
+                responseBox.innerText = "⚠️ Error connecting to server or network issue: " + err.message;
+                processedBox.innerText = "Failed to connect to server.";
+            }
+        }
+
+        // Attach event listener
+        askButton.addEventListener("click", submitQuestion);
+
+        // Optional: press Enter to submit
+        userInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") submitQuestion();
+        });
+    </script>
+</body>
+</html>

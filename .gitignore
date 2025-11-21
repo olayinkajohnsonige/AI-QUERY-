@@ -1,0 +1,17 @@
+# Python Virtual Environment
+venv/
+.venv/
+
+# Environment variables (SECURITY RISK if pushed)
+.env
+
+# Cache files
+__pycache__/
+*.pyc
+
+# IDE files (VS Code, etc.)
+.vscode/
+.idea/
+
+# Node.js Dependencies (THIS IS THE KEY FIX)
+node_modules/
