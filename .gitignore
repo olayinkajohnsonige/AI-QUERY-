@@ -15,3 +15,7 @@ __pycache__/
 
 # Node.js Dependencies (THIS IS THE KEY FIX)
 node_modules/
+
+# Node.js Files
+package.json
+package-lock.json
